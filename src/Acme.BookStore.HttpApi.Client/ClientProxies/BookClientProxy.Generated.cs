@@ -7,7 +7,6 @@ using Volo.Abp.Http.Modeling;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Http.Client.ClientProxying;
 using Acme.BookStore.Books;
-using System.Collections.Generic;
 
 // ReSharper disable once CheckNamespace
 namespace Acme.BookStore.Books.ClientProxies;
@@ -16,8 +15,11 @@ namespace Acme.BookStore.Books.ClientProxies;
 [ExposeServices(typeof(IBookAppService), typeof(BookClientProxy))]
 public partial class BookClientProxy : ClientProxyBase<IBookAppService>, IBookAppService
 {
-    public virtual async Task<List<BookDto>> GetListAsync()
+    public virtual async Task<PagedResultDto<BookDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
-        return await RequestAsync<List<BookDto>>(nameof(GetListAsync));
+        return await RequestAsync<PagedResultDto<BookDto>>(nameof(GetListAsync), new ClientProxyRequestTypeValue
+        {
+            { typeof(PagedAndSortedResultRequestDto), input }
+        });
     }
 }
