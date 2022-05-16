@@ -37,6 +37,8 @@ using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
+using Acme.BookStore.Permissions;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Acme.BookStore.Web;
 
@@ -75,6 +77,11 @@ public class BookStoreWebModule : AbpModule
     {
         var hostingEnvironment = context.Services.GetHostingEnvironment();
         var configuration = context.Services.GetConfiguration();
+
+        Configure<RazorPagesOptions>(options =>
+        {
+            options.Conventions.AuthorizePage("/Books/Index", BookStorePermissions.Books.Default);
+        });
 
         ConfigureUrls(configuration);
         ConfigureBundles();
