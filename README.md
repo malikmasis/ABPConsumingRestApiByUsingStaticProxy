@@ -1,5 +1,5 @@
 # Consuming REST APIs from a .NET Client Using ABP's Client Proxy System
-In this article, we will show how to consume rest api by using static client proxy by creating a new project and converting that from dynamic client proxy to static client proxy. Also, I will glance the differences between static and dynamic generic proxies.
+In this article, we will show how to consume rest api by using static client proxy by creating a new project and converting that from dynamic client proxy to static client proxy. Also, I will glance at the differences between static and dynamic generic proxies.
 
 Article flow
 * Create a new ABP application with ABP CLI
@@ -37,8 +37,8 @@ From now on, we will add some files to show the case to you.
 
 
 ### Create application service interface
-You should open your web application then find `Pages` folder and create new folder named `Books`.
-You should create a new razor page and a new js file as name index.
+You should open your web application then find `Pages` folder and a create new folder named `Books`.
+You should create a new razor page and a new js file as named index.
 
 Change the Pages/Books/Index.cshtml as the following:   
 ```csharp
@@ -225,13 +225,13 @@ public class BookStoreApplicationModule : AbpModule
 
 > The [application startup template](https://docs.abp.io/en/abp/latest/Startup-Templates/Application) comes pre-configured for the **dynamic** client proxy generation, in the `HttpApi.Client` project. If you want to switch to the **static** client proxies, change `context.Services.AddHttpClientProxies` to `context.Services.AddStaticHttpClientProxies` in the module class of your `HttpApi.Client` project.
 
-Now you're ready to generate the client proxy code by running the following the command in the root folder of your client project when your project is running.
+Now you're ready to generate the client proxy code by running the following command in the root folder of your client project when your project is running.
 
 ````bash
 abp generate-proxy -t csharp -u http://localhost:44397/
 ````
 
-Also you should the run the below command under your web project for the UI side for MVC
+Also, you should then run the below command under your web project for the UI side for MVC
 ````bash
 abp generate-proxy -t js -u http://localhost:44397/
 ````
@@ -279,10 +279,10 @@ After completing that you can make localization configuration and you should giv
 ![list page](images/list.png)
 
 ### Further Reading
-In this small tutorial, I explained how you can create an example project and apply static client proxy instead of dyamic client proxy. Also summarized the differences of both approaches.
+In this small tutorial, I explained how you can create an example project and apply static client proxy instead of dynamic client proxy. Also summarized the differences between both approaches.
 
-If you want to get more information about, you can read the following documents:
+If you want to get more information, you can read the following documents:
 
-[Static C# API Client Proxies](https://docs.abp.io/en/abp/latest/API/Static-CSharp-API-Clients)
-[Dynamic C# API Client Proxies](https://docs.abp.io/en/abp/latest/API/Dynamic-CSharp-API-Clients)
-[Web Application Development Tutorial ](https://docs.abp.io/en/abp/latest/Tutorials/Part-1?UI=MVC&DB=EF)
+* [Static C# API Client Proxies](https://docs.abp.io/en/abp/latest/API/Static-CSharp-API-Clients)
+* [Dynamic C# API Client Proxies](https://docs.abp.io/en/abp/latest/API/Dynamic-CSharp-API-Clients)
+* [Web Application Development Tutorial ](https://docs.abp.io/en/abp/latest/Tutorials/Part-1?UI=MVC&DB=EF)
