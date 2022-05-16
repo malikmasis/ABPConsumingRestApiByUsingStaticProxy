@@ -13,6 +13,8 @@
     "PublishDate": "Publish date",
     "NewBook": "New book",
     "Name": "Name",
-    "Price": "Price"
+    "Price": "Price",
+    "Permission:BookStore": "Book Store",
+    "Permission:Books": "Book Management"
   }
 }

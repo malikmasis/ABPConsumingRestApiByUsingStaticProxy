@@ -37,7 +37,7 @@ public class BookStoreMenuContributor : IMenuContributor
         context.Menu.Items.Insert(
             1,
             new ApplicationMenuItem(
-                BookStoreMenus.Home,
+                BookStoreMenus.Books,
                 l["Menu:Books"],
                 "/Books",
                 icon: "fas fa-list",
