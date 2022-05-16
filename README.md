@@ -11,6 +11,7 @@ Article flow
 * Grant the permission 
 * Further reading
 
+### Create a new ABP application with ABP CLI
 Firstly create a new template via ABP CLI. 
 
 ````shell
@@ -34,8 +35,65 @@ Now your project is ready you can run it properly.
 
 From now on, we will add some files to show the case to you.  
 
-### Creating the Application Service
 
+### Create application service interface
+You should open your web application then find `Pages` folder and create new folder named `Books`.
+You should create a new razor page and a new js file as name index.
+
+Change the Pages/Books/Index.cshtml as the following:   
+```csharp
+@page
+@using Acme.BookStore.Localization
+@using Acme.BookStore.Web.Pages.Books
+@using Microsoft.Extensions.Localization
+@model IndexModel
+@inject IStringLocalizer<BookStoreResource> L
+@section scripts
+{
+    <abp-script src="/Pages/Books/index.js" />
+}
+<abp-card>
+    <abp-card-header>
+        <h2>@L["Books"]</h2>
+    </abp-card-header>
+    <abp-card-body>
+        <abp-table striped-rows="true" id="BooksTable"></abp-table>
+    </abp-card-body>
+</abp-card>
+```
+
+Now change index.js file as the following content
+```js
+$(function () {
+    var l = abp.localization.getResource('BookStore');
+    $('#BooksTable').DataTable(
+        abp.libs.datatables.normalizeConfiguration({
+            serverSide: true,
+            paging: true,
+            order: [[1, "asc"]],
+            searching: false,
+            scrollX: true,
+            ajax: abp.libs.datatables.createAjax(acme.bookStore.books.book.getList),
+            columnDefs: [
+                {
+                    title: l('Name'),
+                    data: "name"
+                },
+                {
+                    title: l('AuthorName'),
+                    data: "authorName"
+                },
+                {
+                    title: l('Price'),
+                    data: "price"
+                }
+            ]
+        })
+    );
+});
+```
+
+# Implement the application service
 Assume that we have an `IBookAppService` interface:
 
 ````csharp
@@ -73,32 +131,30 @@ namespace Acme.BookStore.Books
 }
 ```
 
-And implemented as the following:
-
 ```csharp
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Volo.Abp.Application.Services;
-
 namespace Acme.BookStore.Books
 {
     public class BookAppService : ApplicationService, IBookAppService
     {
-        public Task<List<BookDto>> GetListAsync()
+        public Task<PagedResultDto<BookDto>> GetListAsync(PagedAndSortedResultRequestDto input)
         {
-            return Task.FromResult(new List<BookDto>()
+            var bookDtos = new List<BookDto>()
             {
                 new BookDto(){ Name = "Anna Karenina", AuthorName ="Tolstoy", Price = 50},
                 new BookDto(){ Name = "Crime and Punishment", AuthorName ="Dostoevsky", Price = 60},
                 new BookDto(){ Name = "Mother", AuthorName ="Gorki", Price = 70}
-            });
+            };
+            return Task.FromResult(new PagedResultDto<BookDto>(
+               bookDtos.Count,
+               bookDtos
+           ));
         }
     }
 }
 ```
 It simply returns a list of books. You probably want to get the books from a database, but it doesn't matter for this article. To do it you can visit [here] (https://docs.abp.io/en/abp/latest/Tutorials/Part-1?UI=MVC&DB=EF)
 
-### Creating the Application Service Tests
+### Consume the app service from the console application
 Add a new test class, named BookAppService_Tests in the Application.Tests
 
 ```csharp
@@ -127,6 +183,19 @@ namespace Acme.BookStore.Books
 ```
 
 ### Convert application to use static client proxies
+Before showing you how to use static client proxies instead of dynamic client proxy, I ask for talk differences between both approach. Their similarty, advantages and disadvantages to each other.
+
+##### Benefits
+* Maps C# method calls to remote server HTTP calls by considering the HTTP method, route, query string parameters, request payload and other details.
+* Authenticates the HTTP Client by adding access token to the HTTP header.
+* Serializes to and deserialize from JSON.
+* Handles HTTP API versioning.
+* Add correlation id, current tenant id and the current culture to the request.
+* Properly handles the error messages sent by the server and throws proper exceptions.
+
+##### Differences
+Static generic proxies provide better performance because it doesn't need to run on runtime, but you should **re-generate** once changing API endpoint definition. Dynamic generic proxies don't need **re-generate** again because working on the runtime can take more a bit of time. 
+
 First, add Volo.Abp.Http.Client NuGet package to your client project:
 ````shell
 Install-Package Volo.Abp.Http.Client
@@ -162,8 +231,52 @@ Now you're ready to generate the client proxy code by running the following the 
 abp generate-proxy -t csharp -u http://localhost:44397/
 ````
 
-You have been should the generated files under the same folder.
+Also you should the run the below command under your web project for the UI side for MVC
+````bash
+abp generate-proxy -t js -u http://localhost:44397/
+````
 
+You have been should the generated files under the runned folder.
+
+### Add authorization
+ABP Framework provides an authorization system based on the ASP.NET Core's authorization infrastructure.
+Even so, to use that need to make some configurations.
+
+Under `Acme.BookStore.Application.Contracts` open `BookStorePermissions` and paste the below code
+```csharp
+public static class BookStorePermissions
+{
+    public const string GroupName = "BookStore";
+
+    public static class Books
+    {
+        public const string Default = GroupName + ".Books";
+    }
+
+}
+```
+Also need to change `BookStorePermissionDefinitionProvider` under the same folder and project as following.
+```csharp
+public class BookStorePermissionDefinitionProvider : PermissionDefinitionProvider
+{
+    public override void Define(IPermissionDefinitionContext context)
+    {
+        var bookStoreGroup = context.AddGroup(BookStorePermissions.GroupName, L("Permission:BookStore"));
+        bookStoreGroup.AddPermission(BookStorePermissions.Books.Default, L("Permission:Books"));
+    }
+
+    private static LocalizableString L(string name)
+    {
+        return LocalizableString.Create<BookStoreResource>(name);
+    }
+}
+```
+And now you should add [Authorize(BookStorePermissions.Books.Default)] to `BookAppService`
+If you don't give permission you should see the following screen.
+![access denied](images/access_denied.png)
+
+After completing that you can make localization configuration and you should give permission from the Admin UI side. Now you should the following screen.
+![list page](images/list.png)
 
 ### Further Reading
 In this small tutorial, I explained how you can create an example project and apply static client proxy instead of dyamic client proxy. Also summarized the differences of both approaches.
