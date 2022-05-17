@@ -231,7 +231,7 @@ PermissionRequirement: BookStore.Books
 AuthenticationScheme: Identity.Application was forbidden.
 Request finished HTTP/1.1 GET https://localhost:44397/api/app/book?SkipCount=0&MaxResultCount=10&api-version=1.0 - - - 403 0 - 156.9766ms
 
-After completing that you can make the localization configuration and you should give permission at the Admin UI side. You can again you same the output and all will be fine.
+After completing that you can make the localization configuration and you should give permission at the Admin UI side. You can see the same output again and all will be alright.
 
 ### Further Reading
 In this small tutorial, I explained how you can create an example project and apply static client proxy instead of dynamic client proxy. Also summarized the differences between both approaches.
